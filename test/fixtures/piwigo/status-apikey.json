@@ -1,0 +1,28 @@
+{
+  "stat": "ok",
+  "result": {
+    "username": "admin",
+    "status": "webmaster",
+    "theme": "modus",
+    "language": "en_GB",
+    "pwg_token": "00000000000000000000000000000000",
+    "charset": "utf-8",
+    "current_datetime": "2026-10-25 05:51:39",
+    "version": "16.4.0",
+    "save_visits": false,
+    "connected_with": "api_key",
+    "available_sizes": [
+      "square",
+      "thumb",
+      "2small",
+      "xsmall",
+      "small",
+      "medium",
+      "large",
+      "xlarge",
+      "xxlarge"
+    ],
+    "upload_file_types": "jpg,jpeg,png,gif,webp",
+    "upload_form_chunk_size": 500
+  }
+}

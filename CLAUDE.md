@@ -32,15 +32,21 @@ pushing.
 
 ```
 index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/app.js                        registers every SDK handler on the hub (also used by the tests)
+src/hub.js                        readings on a timer, states, scene events, scene action, widget data
+src/devices.js                    the gallery and album devices: features, names in four languages
+src/piwigo/client.js              web services client (ws.php): API key, session, error kinds
+src/piwigo/http.js                the one network function (node:http/https), the test seam
+src/piwigo/model.js               parsing of the Piwigo answers (names, dates, albums, photos)
+src/scenes.js                     scene action handler (manifest `scene_actions`)
+src/widgets.js                    the `latest_photos` widget and its thumbnails
+src/texts.js                      every text sent outside the widget, four languages
+src/store.js                      /data/piwigo-state.json (last photo id, album counts)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (en and fr mandatory)
+test/                             node --test, fake Piwigo (test/helpers) + the SDK's fake Gladys
+test/fixtures/piwigo/             real answers of Piwigo 16.4.0, anonymized
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +76,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German and Spanish: action
+  messages, manifest texts, feature names, widget texts, and `docs/en.md`,
+  `docs/fr.md`, `docs/de.md`, `docs/es.md`, kept in sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +240,31 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Piwigo (vérifié sur la 16.4.0, image `linuxserver/piwigo` + MariaDB 11, 25/10/2026)
+
+- **API** : `ws.php?format=json&method=…`, paramètres en POST (formulaire). Réponse `{ stat: 'ok', result }`
+  ou `{ stat: 'fail', err, message }`, avec un statut HTTP qui suit parfois `err` (401), parfois non (200).
+- **Clé d'API (Piwigo 16)** : `pkid-AAAAMMJJ-<20 car.>:<secret de 40 car.>`, envoyée dans l'en-tête
+  `X-PIWIGO-API` à chaque requête, sans session. Clé refusée : HTTP 401 `Invalid api_key`. Une clé ne se crée
+  que depuis une **session web** (`connected_with_pwg_ui`) : `pwg.users.api_key.create` répond 401 à une
+  session ouverte par `pwg.session.login`. `pwg.session.login` accepte aussi `username=pkid-…`,
+  `password=<secret>`.
+- **Session** : cookie `pwg_id`. Mot de passe refusé : HTTP 200, `err: 999`. **Une session oubliée n'est pas
+  une erreur** : Piwigo répond en invité (albums publics seulement). D'où `pwg.session.getStatus` en tête de
+  chaque lecture : `username: 'guest'` avec des identifiants = rouvrir la session.
+- `pwg.getInfos` : administrateurs seulement (401 `Access denied` sinon) ; seul `nb_users` y est utilisé.
+  Statuts d'administrateur : `admin` et `webmaster`.
+- **Salle d'attente (« lounge »)** : les photos envoyées par l'API (`pwg.images.addSimple`) restent invisibles,
+  compteurs compris, jusqu'à `pwg.images.emptyLounge` (ou la fin de l'envoi dans l'interface). En test, appeler
+  `emptyLounge` après l'envoi.
+- Les **identifiants de photos croissent** : le curseur des nouvelles photos est le dernier id vu.
+  `order: 'date_available desc, id desc'` est accepté (virgule, espaces) par `pwg.categories.getImages`.
+- Les **dates** (`date_available`, `max_date_last`, `current_datetime`) sont l'heure murale du serveur, sans
+  fuseau : lues comme UTC et affichées en UTC, elles s'affichent comme dans Piwigo. « Les dernières 24 h » se
+  comptent dans l'horloge de Piwigo (`current_datetime`), pas dans celle du conteneur.
+- `pwg.categories.getList` avec `recursive=true` : `total_nb_images` compte les sous-albums, `uppercats` donne le
+  chemin. Les noms peuvent contenir des entités HTML : préférer `name_raw` et décoder.
+- Les URL des réponses (`page_url`, `derivatives`) portent l'hôte vu par Piwigo : les miniatures sont relues sur
+  l'adresse configurée (`client.mediaUrl`). `i.php` sert les dérivés sans contrôle d'accès ; la taille `2small`
+  (240 px) suffit au widget.
