@@ -318,3 +318,91 @@ test('the container reads the gallery on its own timer', async (t) => {
   assert.equal(events(w, TRIGGERS.PHOTOS_ADDED).length, 1, 'a reading by the timer');
   assert.ok(w.server.requests.length > before);
 });
+
+test('another account on the same gallery is a starting point, not news', async (t) => {
+  const clock = createClock();
+  const dataDir = (await createWorld({ connect: false })).dataDir;
+  const guest = await world(t, { clock, dataDir, config: { server_url: SERVER_URL } });
+  await guest.app.stop();
+  // The key sees the private album "Famille" and its photos, older than the cursor of the guest.
+  const w = await world(t, { clock, dataDir, server: guest.server });
+  await w.hub.refresh();
+  assert.deepEqual(w.fake.sceneEvents, []);
+  w.server.add(makeImage(6, { albums: [2], at: ADDED_AT }));
+  await w.hub.refresh();
+  assert.deepEqual(
+    w.fake.sceneEvents.map((event) => [event.key, event.data.album]),
+    [
+      [TRIGGERS.PHOTOS_ADDED, 'Famille'],
+      [TRIGGERS.ALBUM_PHOTOS_ADDED, 'Famille'],
+    ],
+  );
+});
+
+test('an album hidden then shown again is no news; a new album counts from zero', async (t) => {
+  const w = await world(t);
+  const famille = w.server.albums.find((album) => album.id === 2);
+  famille.status = 'private';
+  w.server.admins.delete('admin');
+  const hidden = w.server.albums;
+  w.server.albums = hidden.filter((album) => album.id !== 2);
+  await w.hub.refresh();
+  w.server.albums = hidden;
+  await w.hub.refresh();
+  assert.deepEqual(w.fake.sceneEvents, []);
+  w.server.albums.push({
+    ...famille,
+    id: 9,
+    name: 'Nouvel album',
+    name_raw: 'Nouvel album',
+    uppercats: '9',
+  });
+  w.server.add(makeImage(6, { albums: [9], at: ADDED_AT }));
+  await w.hub.refresh();
+  const album = events(w, TRIGGERS.ALBUM_PHOTOS_ADDED).map((event) => [
+    event.data.album,
+    event.data.count,
+  ]);
+  assert.deepEqual(album, [['Nouvel album', 1]]);
+});
+
+test('the scene action and the album widget reopen a forgotten session', async (t) => {
+  const w = await world(t, {
+    config: { server_url: SERVER_URL, username: 'admin', password: 'secret-1', albums: 'Famille' },
+  });
+  w.server.forgetSessions();
+  const ack = await w.fake.sceneAction('get_latest_photos', { album: 'Famille' });
+  assert.equal(ack.success, true, ack.error);
+  assert.equal(ack.data.outputs.total, 2, 'not the guest view');
+  w.server.forgetSessions();
+  const widget = await w.fake.widgetGet('latest_photos', {
+    settings: { album: albumDevice(w.gladys, 2) },
+  });
+  const list = widget.data.content.components.find((c) => c.type === 'card-list');
+  assert.equal(list.items.length, 2);
+});
+
+test('a reconfiguration during a reading keeps the state of the new gallery clean', async (t) => {
+  const w = await world(t);
+  w.server.add(makeImage(6, { at: ADDED_AT }));
+  const publish = w.gladys.publishDiscoveredDevices.bind(w.gladys);
+  let reconfigured;
+  w.gladys.publishDiscoveredDevices = async (devices) => {
+    w.gladys.publishDiscoveredDevices = publish;
+    reconfigured = w.hub.reconfigure({ ...w.hub.config, password: null, url: 'http://192.0.2.99' });
+    return publish(devices);
+  };
+  w.hub.devicesKey = null;
+  await w.hub.refresh();
+  await reconfigured;
+  assert.equal(w.hub.saved.source, 'http://192.0.2.99|guest');
+  assert.equal(w.hub.saved.lastId, null);
+  assert.equal(w.hub.saved.albums, null);
+});
+
+test('a reverse proxy answering 503 means the gallery does not answer', async (t) => {
+  const server = new FakePiwigo();
+  server.answer = () => ({ status: 503, headers: {}, body: '<html>503</html>' });
+  const w = await world(t, { server });
+  assert.match(w.fake.connectionStatus.message.en, /the gallery does not answer/);
+});

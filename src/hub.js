@@ -25,7 +25,7 @@ import {
   galleryIds,
   galleryValues,
 } from './devices.js';
-import { ERROR_KINDS, PiwigoClient } from './piwigo/client.js';
+import { AUTH_MODES, ERROR_KINDS, PiwigoClient, authOf } from './piwigo/client.js';
 import { parseAlbums, parseImages, parseInfos, parseStatus, stamp } from './piwigo/model.js';
 import {
   ACTION_TEXT,
@@ -58,7 +58,7 @@ export const HUB_TIMINGS = {
   // Photos kept for the widget.
   shownCount: 8,
   // Photos read by the scene action.
-  actionCount: 100,
+  actionCount: 500, // the most Piwigo returns in one page
   // At most this many album events per reading.
   maxEventsPerRead: 10,
   // The last photos of an album shown by the widget are read again after this.
@@ -70,6 +70,27 @@ export const HUB_TIMINGS = {
 const DAY_MS = 24 * 60 * 60_000;
 
 const signature = (config) => JSON.stringify([config.url, config.username, config.password]);
+
+/**
+ * The gallery and the account reading it (never a secret: the id of an API
+ * key, a user name, or "guest"). Another account sees other photos and
+ * albums: its additions are counted again from now.
+ */
+export function identityOf(config) {
+  if (!config.url) {
+    return null;
+  }
+  const auth = authOf(config.username, config.password);
+  const account =
+    auth.mode === AUTH_MODES.API_KEY
+      ? auth.key.split(':')[0]
+      : auth.mode === AUTH_MODES.SESSION
+        ? `user:${config.username}`
+        : 'guest';
+  return `${config.url}|${account}`;
+}
+
+const freshSaved = (source) => ({ source, lastId: null, total: null, albums: null });
 
 const emptySnapshot = () => ({
   photos: null,
@@ -120,8 +141,8 @@ export class PiwigoHub {
     this.transportsKey = null;
     this.connection = null;
     this.devicesKey = null;
-    this.saved = { url: null, lastId: null, albums: null };
-    this.lastTotal = null;
+    /** Kept under /data: whose additions, last photo id, photo total, album counts. */
+    this.saved = freshSaved(null);
     this.timer = null;
     this.running = null;
     this.stopped = false;
@@ -153,9 +174,11 @@ export class PiwigoHub {
 
   async start(config) {
     const saved = await this.store.load();
+    const count = (value) => (Number.isInteger(value) && value >= 0 ? value : null);
     this.saved = {
-      url: typeof saved.url === 'string' ? saved.url : null,
-      lastId: Number.isInteger(saved.lastId) && saved.lastId >= 0 ? saved.lastId : null,
+      source: typeof saved.source === 'string' ? saved.source : null,
+      lastId: count(saved.lastId),
+      total: count(saved.total),
       albums: saved.albums && typeof saved.albums === 'object' ? saved.albums : null,
     };
     await this.reconfigure(config);
@@ -183,9 +206,9 @@ export class PiwigoHub {
             request: this.request,
           })
         : null;
-      // Another gallery: its additions are counted again from now.
-      if (config.url && this.saved.url !== config.url) {
-        this.saved = { url: config.url, lastId: null, albums: null };
+      // Another gallery or another account: its additions are counted again from now.
+      if (config.url && this.saved.source !== identityOf(config)) {
+        this.saved = freshSaved(identityOf(config));
         this.store.save(this.saved);
       }
     }
@@ -214,7 +237,6 @@ export class PiwigoHub {
     this.missing = [];
     this.albumCache.clear();
     this.transportsKey = null;
-    this.lastTotal = null;
   }
 
   async stop() {
@@ -269,6 +291,8 @@ export class PiwigoHub {
       await this.afterChanges(false);
       return;
     }
+    // A reconfiguration during the reading replaces this.saved: this reading keeps its own.
+    const saved = this.saved;
     let changed;
     try {
       const status = parseStatus(await client.status());
@@ -311,8 +335,11 @@ export class PiwigoHub {
       };
       this.followAlbums();
       await this.publishDevices();
-      await this.announcePhotos(recent);
-      await this.announceAlbums(albums);
+      if (client !== this.client) {
+        return;
+      }
+      await this.announcePhotos(recent, saved);
+      await this.announceAlbums(albums, saved);
       await this.publishStates();
       changed = wasReachable !== true || before !== this.widgetKey();
     } catch (err) {
@@ -377,25 +404,19 @@ export class PiwigoHub {
    * Announce the photos above the last id seen. The first reading of a
    * gallery is the starting point, not news.
    */
-  async announcePhotos({ images, total }) {
+  async announcePhotos({ images, total }, saved) {
     const newest = Math.max(0, ...images.map((image) => image.id));
-    const lastId = this.saved.lastId;
-    const previousTotal = this.lastTotal;
-    this.lastTotal = total;
-    if (lastId === null) {
-      this.saved.lastId = newest;
-      this.store.save(this.saved);
-      return;
-    }
-    const fresh = images.filter((image) => image.id > lastId);
+    const { lastId, total: previousTotal } = saved;
+    const fresh = lastId === null ? [] : images.filter((image) => image.id > lastId);
+    saved.total = total;
+    saved.lastId = lastId === null ? newest : Math.max(lastId, newest);
+    this.save(saved);
     if (fresh.length === 0) {
-      return;
+      return; // the first reading of a gallery is the starting point
     }
-    this.saved.lastId = Math.max(lastId, newest);
-    this.store.save(this.saved);
     // Every photo read is new: more may have come than the page holds.
     const more =
-      fresh.length === images.length && Number.isFinite(previousTotal)
+      fresh.length === images.length && previousTotal !== null
         ? Math.max(0, total - previousTotal)
         : 0;
     const [latest] = fresh;
@@ -410,21 +431,31 @@ export class PiwigoHub {
     });
   }
 
-  /** Announce the albums holding more photos than at the previous reading. */
-  async announceAlbums(albums) {
-    const previous = this.saved.albums;
-    const current = Object.fromEntries(albums.map((album) => [album.id, album.photos]));
-    const grown = previous
-      ? albums
-          .map((album) => ({ album, added: album.photos - (previous[album.id] ?? 0) }))
-          .filter(({ added }) => added > 0)
-      : []; // the first reading of the albums is the starting point
-    // Past the cap, an album keeps its previous count: announced at the next reading.
-    for (const { album } of grown.slice(this.timings.maxEventsPerRead)) {
-      current[album.id] = previous[album.id] ?? 0;
+  /**
+   * Announce the albums holding more photos than at the previous reading. An
+   * album seen for the first time counts from zero only when it is newer than
+   * every album known (album ids grow too): an older one was hidden (rights)
+   * and is a starting point. Albums no longer seen keep their count.
+   */
+  async announceAlbums(albums, saved) {
+    const previous = saved.albums;
+    const newestKnown = previous ? Math.max(0, ...Object.keys(previous).map(Number)) : 0;
+    const current = { ...previous };
+    const grown = [];
+    for (const album of albums) {
+      const before = previous?.[album.id] ?? (album.id > newestKnown ? 0 : album.photos);
+      current[album.id] = album.photos;
+      // The first reading of the albums is the starting point.
+      if (previous && album.photos > before) {
+        grown.push({ album, added: album.photos - before, before });
+      }
     }
-    this.saved.albums = current;
-    this.store.save(this.saved);
+    // Past the cap, an album keeps its previous count: announced at the next reading.
+    for (const { album, before } of grown.slice(this.timings.maxEventsPerRead)) {
+      current[album.id] = before;
+    }
+    saved.albums = current;
+    this.save(saved);
     for (const { album, added } of grown.slice(0, this.timings.maxEventsPerRead)) {
       this.albumCache.delete(album.id);
       logger.debug(`Album ${album.id}: ${added} new photo(s)`);
@@ -441,6 +472,13 @@ export class PiwigoHub {
           url: album.url,
         },
       );
+    }
+  }
+
+  /** Write the state, unless a reconfiguration replaced it meanwhile. */
+  save(saved) {
+    if (saved === this.saved) {
+      this.store.save(saved);
     }
   }
 
@@ -656,6 +694,8 @@ export class PiwigoHub {
   async latestPhotos(entry) {
     const client = this.requireClient();
     try {
+      // A session Piwigo forgot would read the guest view without an error.
+      await client.ensureSession();
       let album = null;
       if (entry) {
         const albums = parseAlbums(await client.albums());
@@ -663,7 +703,6 @@ export class PiwigoHub {
         if (!album) {
           throw new Error(pick(ACTION_TEXT.unknownAlbum, this.config.language));
         }
-        this.albums = albums;
       }
       const { images, total } = parseImages(
         await client.recent({ count: this.timings.actionCount, album: album?.id ?? null }),
@@ -698,8 +737,10 @@ export class PiwigoHub {
     if (cached && this.now() - cached.at < this.timings.albumCacheMs) {
       return cached.images;
     }
+    const client = this.requireClient();
+    await client.ensureSession();
     const { images } = parseImages(
-      await this.requireClient().recent({ count: this.timings.shownCount, album: album.id }),
+      await client.recent({ count: this.timings.shownCount, album: album.id }),
     );
     this.albumCache.set(album.id, { at: this.now(), images });
     return images;

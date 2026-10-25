@@ -268,3 +268,9 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Les URL des réponses (`page_url`, `derivatives`) portent l'hôte vu par Piwigo : les miniatures sont relues sur
   l'adresse configurée (`client.mediaUrl`). `i.php` sert les dérivés sans contrôle d'accès ; la taille `2small`
   (240 px) suffit au widget.
+- **Ce qu'un compte voit dépend du compte** : invité, utilisateur simple et administrateur ne voient pas les mêmes
+  albums. L'état de `/data` est donc lié à l'adresse **et** au compte (`identityOf`, sans secret) : changer de
+  compte repart de zéro, sinon les photos privées anciennes partent en « nouvelles photos ». Un album jamais vu
+  ne compte depuis zéro que s'il est plus récent (id) que tous les albums connus : sinon il était masqué.
+- Une session oubliée lit en invité **sans erreur** : toute lecture hors du cycle (action de scène, widget
+  d'album) passe d'abord par `client.ensureSession()`.

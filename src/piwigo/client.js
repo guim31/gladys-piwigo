@@ -144,7 +144,9 @@ export class PiwigoClient {
         // A reverse proxy's login page, another web application...
         throw new PiwigoError(ERROR_KINDS.NOT_PIWIGO, `${method} did not answer JSON`, { status });
       }
-      throw new PiwigoError(ERROR_KINDS.HTTP, `${method} answered HTTP ${status}`, { status });
+      // A reverse proxy in front of a Piwigo that is down.
+      const kind = [502, 503, 504].includes(status) ? ERROR_KINDS.UNREACHABLE : ERROR_KINDS.HTTP;
+      throw new PiwigoError(kind, `${method} answered HTTP ${status}`, { status });
     }
     if (!json || typeof json !== 'object' || !['ok', 'fail'].includes(json.stat)) {
       throw new PiwigoError(ERROR_KINDS.NOT_PIWIGO, `${method}: not a Piwigo answer`, { status });
@@ -204,6 +206,13 @@ export class PiwigoClient {
     return status;
   }
 
+  /** Before a read outside the reading: a session Piwigo forgot is opened again. */
+  async ensureSession() {
+    if (this.auth.mode === AUTH_MODES.SESSION) {
+      await this.status();
+    }
+  }
+
   /** The figures of the gallery (administrators only). */
   infos() {
     return this.call('pwg.getInfos');
@@ -238,7 +247,12 @@ export class PiwigoClient {
     } catch {
       return null;
     }
-    const relative = `${url.pathname}${url.search}`;
+    const base = new URL(this.url).pathname.replace(/\/+$/, '');
+    let relative = `${url.pathname}${url.search}`;
+    // The gallery folder first: it may itself hold "upload" or "galleries".
+    if (base && relative.startsWith(`${base}/`)) {
+      relative = relative.slice(base.length);
+    }
     const match = MEDIA_PATH.exec(relative);
     if (!match || relative.includes('..')) {
       return null;

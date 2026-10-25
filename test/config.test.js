@@ -172,3 +172,19 @@ test('the "last photo added" text, in the four languages', () => {
   assert.equal(describePhoto(image, null, 'de'), 'Sunset · 14. Mai 2026');
   assert.equal(describePhoto({ ...image, addedAt: null }, null, 'es'), 'Sunset');
 });
+
+test('thumbnail URLs are read on the configured address, folder included', async () => {
+  const { PiwigoClient } = await import('../src/piwigo/client.js');
+  const client = new PiwigoClient({ url: 'http://192.0.2.30:8080/galleries/family' });
+  assert.equal(
+    client.mediaUrl('http://piwigo.lan/galleries/family/i.php?/upload/2026/a-2s.jpg'),
+    'http://192.0.2.30:8080/galleries/family/i.php?/upload/2026/a-2s.jpg',
+  );
+  assert.equal(
+    client.mediaUrl('http://other/_data/i/upload/a-2s.jpg'),
+    'http://192.0.2.30:8080/galleries/family/_data/i/upload/a-2s.jpg',
+  );
+  assert.equal(client.mediaUrl('http://other/admin.php'), null);
+  assert.equal(client.mediaUrl('http://other/upload/../../etc/passwd'), null);
+  assert.equal(client.mediaUrl('not a url'), null);
+});
