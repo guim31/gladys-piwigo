@@ -1,0 +1,26 @@
+{
+  "stat": "ok",
+  "result": {
+    "username": "lecteur",
+    "status": "normal",
+    "theme": "modus",
+    "language": "en_GB",
+    "pwg_token": "00000000000000000000000000000000",
+    "charset": "utf-8",
+    "current_datetime": "2026-10-25 05:51:40",
+    "version": "16.4.0",
+    "save_visits": true,
+    "connected_with": "ws_session_login",
+    "available_sizes": [
+      "square",
+      "thumb",
+      "2small",
+      "xsmall",
+      "small",
+      "medium",
+      "large",
+      "xlarge",
+      "xxlarge"
+    ]
+  }
+}

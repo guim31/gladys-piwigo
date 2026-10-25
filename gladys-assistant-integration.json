@@ -1,177 +1,574 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Piwigo",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Your Piwigo photo gallery in Gladys: counters, followed albums, new photos in scenes, widget.",
+    "fr": "Votre galerie Piwigo dans Gladys : compteurs, albums suivis, nouvelles photos en scène, widget.",
+    "de": "Deine Piwigo-Fotogalerie in Gladys: Zähler, verfolgte Alben, neue Fotos in Szenen, Widget.",
+    "es": "Su galería de fotos Piwigo en Gladys: contadores, álbumes seguidos, fotos nuevas en escenas, widget."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-piwigo:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-piwigo/main/cover.png",
+  "categories": ["multimedia"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Connect to your Piwigo gallery",
+        "fr": "Connexion à votre galerie Piwigo",
+        "de": "Verbindung zu deiner Piwigo-Galerie",
+        "es": "Conexión a su galería Piwigo"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Enter the address of the gallery and an API key (Piwigo 16: your profile > API keys, paste the whole key in the password field), or the user name and password of an account. An admin account also shows the users. Empty: public albums only.",
+        "fr": "Saisissez l'adresse de la galerie et une clé d'API (Piwigo 16 : votre profil > Clés d'API, collez la clé entière dans le mot de passe), ou le nom et le mot de passe d'un compte. Un compte admin montre aussi les utilisateurs. Vide : albums publics seuls.",
+        "de": "Gib die Adresse der Galerie und einen API-Schlüssel ein (Piwigo 16: dein Profil > API-Schlüssel, den ganzen Schlüssel ins Passwortfeld), oder Benutzername und Passwort eines Kontos. Ein Admin-Konto zeigt auch die Benutzer. Leer: nur öffentliche Alben.",
+        "es": "Introduzca la dirección de la galería y una clave de API (Piwigo 16: su perfil > Claves de API, pegue la clave entera en la contraseña), o el usuario y la contraseña de una cuenta. Una cuenta admin muestra también los usuarios. Vacío: solo álbumes públicos."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://piwigo.org/doc/doku.php?id=dev:webapi:start",
+          "label": {
+            "en": "Piwigo web API",
+            "fr": "API web de Piwigo",
+            "de": "Web-API von Piwigo",
+            "es": "API web de Piwigo"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "server_url",
+      "type": "string",
+      "label": {
+        "en": "Gallery URL",
+        "fr": "Adresse de la galerie",
+        "de": "Adresse der Galerie",
+        "es": "Dirección de la galería"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "description": {
+        "en": "Address of the gallery, port and folder included. An https address behind a reverse proxy works too.",
+        "fr": "Adresse de la galerie, port et dossier compris. Une adresse https derrière un proxy inverse convient aussi.",
+        "de": "Adresse der Galerie mit Port und Ordner. Eine https-Adresse hinter einem Reverse-Proxy geht auch.",
+        "es": "Dirección de la galería, con el puerto y la carpeta. También vale una dirección https tras un proxy inverso."
+      },
+      "placeholder": {
+        "en": "http://192.168.1.20/piwigo",
+        "fr": "http://192.168.1.20/piwigo",
+        "de": "http://192.168.1.20/piwigo",
+        "es": "http://192.168.1.20/piwigo"
+      },
+      "required": true
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "User name (without API key)",
+        "fr": "Nom d'utilisateur (sans clé d'API)",
+        "de": "Benutzername (ohne API-Schlüssel)",
+        "es": "Usuario (sin clave de API)"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "description": {
+        "en": "Leave empty with a whole API key. Filled in: the password below is the one of this account.",
+        "fr": "Laissez vide avec une clé d'API entière. Rempli : le mot de passe ci-dessous est celui de ce compte.",
+        "de": "Mit einem ganzen API-Schlüssel leer lassen. Ausgefüllt: Das Passwort darunter ist das dieses Kontos.",
+        "es": "Déjelo vacío con una clave de API completa. Si lo rellena, la contraseña de abajo es la de esta cuenta."
+      },
+      "required": false
     },
     {
-      "key": "unit",
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "API key (or account password)",
+        "fr": "Clé d'API (ou mot de passe du compte)",
+        "de": "API-Schlüssel (oder Kontopasswort)",
+        "es": "Clave de API (o contraseña de la cuenta)"
+      },
+      "required": false
+    },
+    {
+      "key": "albums",
+      "type": "string",
+      "label": {
+        "en": "Albums to follow",
+        "fr": "Albums à suivre",
+        "de": "Zu verfolgende Alben",
+        "es": "Álbumes que seguir"
+      },
+      "description": {
+        "en": "Names or ids of the albums to follow as devices, separated by commas (Holidays, 12). A sub-album by its path: Holidays / Beach. Empty: none.",
+        "fr": "Noms ou identifiants des albums à suivre comme appareils, séparés par des virgules (Vacances, 12). Un sous-album par son chemin : Vacances / Plage. Vide : aucun.",
+        "de": "Namen oder IDs der Alben, die als Geräte verfolgt werden, durch Kommas getrennt (Urlaub, 12). Ein Unteralbum über seinen Pfad: Urlaub / Strand. Leer: keines.",
+        "es": "Nombres o identificadores de los álbumes que seguir como dispositivos, separados por comas (Vacaciones, 12). Un subálbum por su ruta: Vacaciones / Playa. Vacío: ninguno."
+      },
+      "placeholder": {
+        "en": "Holidays, 12",
+        "fr": "Vacances, 12",
+        "de": "Urlaub, 12",
+        "es": "Vacaciones, 12"
+      },
+      "required": false
+    },
+    {
+      "key": "poll_interval",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Refresh",
+        "fr": "Rafraîchissement",
+        "de": "Aktualisierung",
+        "es": "Actualización"
+      },
+      "description": {
+        "en": "How often the gallery is read (three or four small requests).",
+        "fr": "Fréquence de lecture de la galerie (trois ou quatre petites requêtes).",
+        "de": "Wie oft die Galerie gelesen wird (drei oder vier kleine Anfragen).",
+        "es": "Frecuencia de lectura de la galería (tres o cuatro peticiones pequeñas)."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "300",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "60",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "5 minutes",
+            "fr": "5 minutes",
+            "de": "5 Minuten",
+            "es": "5 minutos"
+          }
+        },
+        {
+          "value": "900",
+          "label": {
+            "en": "15 minutes",
+            "fr": "15 minutes",
+            "de": "15 Minuten",
+            "es": "15 minutos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "language",
+      "type": "select",
+      "display": "radio",
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms",
+        "de": "Sprache der Namen",
+        "es": "Idioma de los nombres"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Language of the feature names, of the last photo text and of the errors of the scene action. Names are set when a device is created: to rename them after a change, delete and re-add the device.",
+        "fr": "Langue des noms des fonctionnalités, du texte de la dernière photo et des erreurs de l'action de scène. Les noms sont fixés à la création de l'appareil : pour les changer, supprimez puis ajoutez de nouveau l'appareil.",
+        "de": "Sprache der Funktionsnamen, des Textes zum letzten Foto und der Fehler der Szenenaktion. Die Namen werden beim Anlegen des Geräts festgelegt: Lösche das Gerät und füge es erneut hinzu, um sie zu ändern.",
+        "es": "Idioma de los nombres de las funciones, del texto de la última foto y de los errores de la acción de escena. Los nombres se fijan al crear el dispositivo: para cambiarlos, elimínelo y añádalo de nuevo."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Reads the gallery now and reports what it finds.",
+        "fr": "Lit la galerie maintenant et indique ce qu'elle trouve.",
+        "de": "Liest die Galerie sofort und meldet, was sie findet.",
+        "es": "Lee la galería ahora e indica lo que encuentra."
+      },
       "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "photos_added",
+      "label": {
+        "en": "New photos added",
+        "fr": "Nouvelles photos ajoutées",
+        "de": "Neue Fotos hinzugefügt",
+        "es": "Fotos nuevas añadidas"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "Photos were added to the gallery (and published by Piwigo), seen at the next reading.",
+        "fr": "Des photos ont été ajoutées à la galerie (et publiées par Piwigo), vues à la lecture suivante.",
+        "de": "Fotos wurden der Galerie hinzugefügt (und von Piwigo veröffentlicht), bei der nächsten Abfrage erkannt.",
+        "es": "Se añadieron fotos a la galería (y Piwigo las publicó), vistas en la lectura siguiente."
+      },
+      "variables": [
+        {
+          "key": "count",
+          "type": "number",
+          "label": {
+            "en": "Number of photos added",
+            "fr": "Nombre de photos ajoutées",
+            "de": "Anzahl hinzugefügter Fotos",
+            "es": "Número de fotos añadidas"
+          }
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "label": {
+            "en": "Name of the last one",
+            "fr": "Nom de la dernière",
+            "de": "Name des letzten",
+            "es": "Nombre de la última"
+          }
+        },
+        {
+          "key": "album",
+          "type": "string",
+          "label": {
+            "en": "Album of the last one",
+            "fr": "Album de la dernière",
+            "de": "Album des letzten",
+            "es": "Álbum de la última"
+          }
+        },
+        {
+          "key": "added_at",
+          "type": "string",
+          "label": {
+            "en": "Date added (Piwigo time)",
+            "fr": "Date d'ajout (heure de Piwigo)",
+            "de": "Hinzugefügt am (Piwigo-Zeit)",
+            "es": "Fecha de adición (hora de Piwigo)"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "Page of the last one",
+            "fr": "Page de la dernière",
+            "de": "Seite des letzten",
+            "es": "Página de la última"
+          }
+        },
+        {
+          "key": "device",
+          "type": "string",
+          "label": {
+            "en": "Gallery device",
+            "fr": "Appareil galerie",
+            "de": "Galeriegerät",
+            "es": "Dispositivo galería"
+          }
+        }
+      ]
+    },
+    {
+      "key": "album_photos_added",
+      "label": {
+        "en": "Photos added to an album",
+        "fr": "Photos ajoutées à un album",
+        "de": "Fotos zu einem Album hinzugefügt",
+        "es": "Fotos añadidas a un álbum"
+      },
+      "description": {
+        "en": "An album, sub-albums included, holds more photos than at the previous reading (a new album counts from zero).",
+        "fr": "Un album, sous-albums compris, contient plus de photos qu'à la lecture précédente (un nouvel album compte depuis zéro).",
+        "de": "Ein Album (mit Unteralben) enthält mehr Fotos als bei der letzten Abfrage (ein neues Album zählt ab null).",
+        "es": "Un álbum, con sus subálbumes, contiene más fotos que en la lectura anterior (un álbum nuevo cuenta desde cero)."
       },
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
+          "key": "album",
+          "type": "string",
+          "label": {
+            "en": "Album name (empty: any)",
+            "fr": "Nom de l'album (vide : tous)",
+            "de": "Albumname (leer: alle)",
+            "es": "Nombre del álbum (vacío: todos)"
+          },
+          "description": {
+            "en": "Exactly as shown in Piwigo, without its parent albums.",
+            "fr": "Exactement comme dans Piwigo, sans ses albums parents.",
+            "de": "Genau wie in Piwigo angezeigt, ohne übergeordnete Alben.",
+            "es": "Exactamente como aparece en Piwigo, sin sus álbumes padre."
+          }
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "album",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Album name",
+            "fr": "Nom de l'album",
+            "de": "Albumname",
+            "es": "Nombre del álbum"
+          }
+        },
+        {
+          "key": "path",
+          "type": "string",
+          "label": {
+            "en": "Album path",
+            "fr": "Chemin de l'album",
+            "de": "Albumpfad",
+            "es": "Ruta del álbum"
+          }
+        },
+        {
+          "key": "album_id",
+          "type": "number",
+          "label": {
+            "en": "Album id",
+            "fr": "Identifiant de l'album",
+            "de": "Album-ID",
+            "es": "Identificador del álbum"
+          }
+        },
+        {
+          "key": "count",
+          "type": "number",
+          "label": {
+            "en": "Photos added",
+            "fr": "Photos ajoutées",
+            "de": "Hinzugefügte Fotos",
+            "es": "Fotos añadidas"
+          }
+        },
+        {
+          "key": "total",
+          "type": "number",
+          "label": {
+            "en": "Photos in the album",
+            "fr": "Photos dans l'album",
+            "de": "Fotos im Album",
+            "es": "Fotos en el álbum"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "Page of the album",
+            "fr": "Page de l'album",
+            "de": "Seite des Albums",
+            "es": "Página del álbum"
+          }
+        },
+        {
+          "key": "device",
+          "type": "string",
+          "label": {
+            "en": "Album device (or gallery)",
+            "fr": "Appareil album (ou galerie)",
+            "de": "Albumgerät (oder Galerie)",
+            "es": "Dispositivo álbum (o galería)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "get_latest_photos",
+      "label": {
+        "en": "Read the last photos",
+        "fr": "Lire les dernières photos",
+        "de": "Letzte Fotos lesen",
+        "es": "Leer las últimas fotos"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Reads the last photos added, of the gallery or of an album, for the next actions: count of the last 24 hours, the last one.",
+        "fr": "Lit les dernières photos ajoutées, de la galerie ou d'un album, pour les actions suivantes : nombre sur 24 heures, la dernière.",
+        "de": "Liest die zuletzt hinzugefügten Fotos der Galerie oder eines Albums für die nächsten Aktionen: Anzahl in 24 Stunden, das letzte.",
+        "es": "Lee las últimas fotos añadidas, de la galería o de un álbum, para las acciones siguientes: número en 24 horas, la última."
+      },
+      "timeout_seconds": 30,
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "key": "album",
+          "type": "string",
+          "label": {
+            "en": "Album (empty: whole gallery)",
+            "fr": "Album (vide : toute la galerie)",
+            "de": "Album (leer: ganze Galerie)",
+            "es": "Álbum (vacío: toda la galería)"
+          },
+          "description": {
+            "en": "Name, path (Holidays / Beach) or id; sub-albums included.",
+            "fr": "Nom, chemin (Vacances / Plage) ou identifiant ; sous-albums compris.",
+            "de": "Name, Pfad (Urlaub / Strand) oder ID; Unteralben inbegriffen.",
+            "es": "Nombre, ruta (Vacaciones / Playa) o identificador; subálbumes incluidos."
+          }
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "count_24h",
+          "type": "number",
+          "label": {
+            "en": "Photos added in 24 hours",
+            "fr": "Photos ajoutées en 24 heures",
+            "de": "In 24 Stunden hinzugefügte Fotos",
+            "es": "Fotos añadidas en 24 horas"
+          }
+        },
+        {
+          "key": "total",
+          "type": "number",
+          "label": {
+            "en": "Photos in all",
+            "fr": "Photos au total",
+            "de": "Fotos insgesamt",
+            "es": "Fotos en total"
+          }
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "label": {
+            "en": "Name of the last one",
+            "fr": "Nom de la dernière",
+            "de": "Name des letzten",
+            "es": "Nombre de la última"
+          }
+        },
+        {
+          "key": "album",
+          "type": "string",
+          "label": {
+            "en": "Album of the last one",
+            "fr": "Album de la dernière",
+            "de": "Album des letzten",
+            "es": "Álbum de la última"
+          }
+        },
+        {
+          "key": "added_at",
+          "type": "string",
+          "label": {
+            "en": "Date added (Piwigo time)",
+            "fr": "Date d'ajout (heure de Piwigo)",
+            "de": "Hinzugefügt am (Piwigo-Zeit)",
+            "es": "Fecha de adición (hora de Piwigo)"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "Page of the last one",
+            "fr": "Page de la dernière",
+            "de": "Seite des letzten",
+            "es": "Página de la última"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "latest_photos",
+      "label": {
+        "en": "Last photos",
+        "fr": "Dernières photos",
+        "de": "Neueste Fotos",
+        "es": "Últimas fotos"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Counters and last photos added to the Piwigo gallery, or to a followed album.",
+        "fr": "Compteurs et dernières photos ajoutées à la galerie Piwigo, ou à un album suivi.",
+        "de": "Zähler und neueste Fotos der Piwigo-Galerie oder eines verfolgten Albums.",
+        "es": "Contadores y últimas fotos añadidas a la galería Piwigo o a un álbum seguido."
+      },
+      "icon": "image",
+      "settings": [
+        {
+          "key": "album",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Followed album (empty: whole gallery)",
+            "fr": "Album suivi (vide : toute la galerie)",
+            "de": "Verfolgtes Album (leer: ganze Galerie)",
+            "es": "Álbum seguido (vacío: toda la galería)"
+          },
+          "required": false
+        },
+        {
+          "key": "thumbnails",
+          "type": "boolean",
+          "label": {
+            "en": "Show thumbnails",
+            "fr": "Afficher les miniatures",
+            "de": "Vorschaubilder anzeigen",
+            "es": "Mostrar miniaturas"
+          },
+          "description": {
+            "en": "Off by default: your photos would then appear on every screen showing this dashboard.",
+            "fr": "Désactivé par défaut : vos photos apparaîtraient alors sur tout écran affichant ce tableau de bord.",
+            "de": "Standardmäßig aus: Deine Fotos erscheinen dann auf jedem Bildschirm mit diesem Dashboard.",
+            "es": "Desactivado por defecto: sus fotos aparecerían en cualquier pantalla que muestre este panel."
+          },
+          "required": false,
+          "default": false
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,49 @@
+{
+  "stat": "ok",
+  "result": {
+    "categories": [
+      {
+        "id": 1,
+        "name": "Vacances 2026",
+        "comment": "",
+        "permalink": null,
+        "status": "public",
+        "uppercats": "1",
+        "global_rank": "2",
+        "id_uppercat": null,
+        "nb_images": 2,
+        "total_nb_images": 3,
+        "representative_picture_id": "4",
+        "date_last": "2026-10-25 05:50:06",
+        "max_date_last": "2026-10-25 05:50:06",
+        "nb_categories": 1,
+        "image_order": "date_available DESC, file ASC, id ASC",
+        "url": "http://192.0.2.30/index.php?/category/1",
+        "name_raw": "Vacances 2026",
+        "comment_raw": null,
+        "tn_url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b36a7ce2-th.jpg"
+      },
+      {
+        "id": 3,
+        "name": "Plage",
+        "comment": "",
+        "permalink": null,
+        "status": "public",
+        "uppercats": "1,3",
+        "global_rank": "2.1",
+        "id_uppercat": "1",
+        "nb_images": 1,
+        "total_nb_images": 1,
+        "representative_picture_id": "3",
+        "date_last": "2026-10-25 05:50:06",
+        "max_date_last": "2026-10-25 05:50:06",
+        "nb_categories": 0,
+        "image_order": "date_available DESC, file ASC, id ASC",
+        "url": "http://192.0.2.30/index.php?/category/3",
+        "name_raw": "Plage",
+        "comment_raw": null,
+        "tn_url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b24589d1-th.jpg"
+      }
+    ]
+  }
+}

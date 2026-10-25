@@ -1,0 +1,8 @@
+{
+  "status": 501,
+  "body": {
+    "stat": "fail",
+    "err": 501,
+    "message": "Method name is not valid"
+  }
+}

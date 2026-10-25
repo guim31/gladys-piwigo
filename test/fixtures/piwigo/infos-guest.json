@@ -1,0 +1,8 @@
+{
+  "status": 401,
+  "body": {
+    "stat": "fail",
+    "err": 401,
+    "message": "Access denied"
+  }
+}

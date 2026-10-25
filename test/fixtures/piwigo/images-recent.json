@@ -1,0 +1,250 @@
+{
+  "stat": "ok",
+  "result": {
+    "paging": {
+      "page": 0,
+      "per_page": 3,
+      "count": 3,
+      "total_count": 5
+    },
+    "images": [
+      {
+        "is_favorite": false,
+        "id": 5,
+        "width": 640,
+        "height": 480,
+        "hit": 0,
+        "file": "p4.jpg",
+        "name": "Photo 4",
+        "comment": null,
+        "date_creation": null,
+        "date_available": "2026-10-25 05:50:06",
+        "page_url": "http://192.0.2.30/picture.php?/5",
+        "element_url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+        "download_url": "http://192.0.2.30/action.php?id=5&part=e&download",
+        "derivatives": {
+          "square": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b869947d-sq.jpg",
+            "width": 120,
+            "height": 120
+          },
+          "thumb": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b869947d-th.jpg",
+            "width": 144,
+            "height": 108
+          },
+          "2small": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b869947d-2s.jpg",
+            "width": 240,
+            "height": 180
+          },
+          "xsmall": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b869947d-xs.jpg",
+            "width": 432,
+            "height": 324
+          },
+          "small": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b869947d-sm.jpg",
+            "width": 576,
+            "height": 432
+          },
+          "medium": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "large": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "xxlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "3xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "4xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b869947d.jpg",
+            "width": 640,
+            "height": 480
+          }
+        },
+        "categories": [
+          {
+            "id": 2,
+            "url": "http://192.0.2.30/index.php?/category/2",
+            "page_url": "http://192.0.2.30/picture.php?/5/category/2"
+          }
+        ]
+      },
+      {
+        "is_favorite": false,
+        "id": 4,
+        "width": 640,
+        "height": 480,
+        "hit": 0,
+        "file": "p3.jpg",
+        "name": "Photo 3",
+        "comment": null,
+        "date_creation": null,
+        "date_available": "2026-10-25 05:50:06",
+        "page_url": "http://192.0.2.30/picture.php?/4",
+        "element_url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+        "download_url": "http://192.0.2.30/action.php?id=4&part=e&download",
+        "derivatives": {
+          "square": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b36a7ce2-sq.jpg",
+            "width": 120,
+            "height": 120
+          },
+          "thumb": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b36a7ce2-th.jpg",
+            "width": 144,
+            "height": 108
+          },
+          "2small": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b36a7ce2-2s.jpg",
+            "width": 240,
+            "height": 180
+          },
+          "xsmall": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b36a7ce2-xs.jpg",
+            "width": 432,
+            "height": 324
+          },
+          "small": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b36a7ce2-sm.jpg",
+            "width": 576,
+            "height": 432
+          },
+          "medium": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "large": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "xxlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "3xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "4xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b36a7ce2.jpg",
+            "width": 640,
+            "height": 480
+          }
+        },
+        "categories": [
+          {
+            "id": 1,
+            "url": "http://192.0.2.30/index.php?/category/1",
+            "page_url": "http://192.0.2.30/picture.php?/4/category/1"
+          }
+        ]
+      },
+      {
+        "is_favorite": false,
+        "id": 3,
+        "width": 640,
+        "height": 480,
+        "hit": 0,
+        "file": "p2.jpg",
+        "name": "Photo 2",
+        "comment": null,
+        "date_creation": null,
+        "date_available": "2026-10-25 05:50:06",
+        "page_url": "http://192.0.2.30/picture.php?/3",
+        "element_url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+        "download_url": "http://192.0.2.30/action.php?id=3&part=e&download",
+        "derivatives": {
+          "square": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b24589d1-sq.jpg",
+            "width": 120,
+            "height": 120
+          },
+          "thumb": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b24589d1-th.jpg",
+            "width": 144,
+            "height": 108
+          },
+          "2small": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b24589d1-2s.jpg",
+            "width": 240,
+            "height": 180
+          },
+          "xsmall": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b24589d1-xs.jpg",
+            "width": 432,
+            "height": 324
+          },
+          "small": {
+            "url": "http://192.0.2.30/i.php?/upload/2026/10/25/20261025055006-b24589d1-sm.jpg",
+            "width": 576,
+            "height": 432
+          },
+          "medium": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "large": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "xxlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "3xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "4xlarge": {
+            "url": "http://192.0.2.30/upload/2026/10/25/20261025055006-b24589d1.jpg",
+            "width": 640,
+            "height": 480
+          }
+        },
+        "categories": [
+          {
+            "id": 3,
+            "url": "http://192.0.2.30/index.php?/category/3",
+            "page_url": "http://192.0.2.30/picture.php?/3/category/3"
+          }
+        ]
+      }
+    ]
+  }
+}

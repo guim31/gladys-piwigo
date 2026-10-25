@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-piwigo",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Piwigo integration for Gladys Assistant: gallery and album counters, new photos as scene triggers, last photos widget.",
   "type": "module",
   "main": "index.js",
   "scripts": {

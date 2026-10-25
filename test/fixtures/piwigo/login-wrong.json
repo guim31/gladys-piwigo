@@ -1,0 +1,8 @@
+{
+  "status": 200,
+  "body": {
+    "stat": "fail",
+    "err": 999,
+    "message": "Invalid username/password"
+  }
+}
