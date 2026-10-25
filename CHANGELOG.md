@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-25
+
 ### Added
 
 - Piwigo gallery device: photos, albums, users (administrator account), and
@@ -27,4 +29,5 @@ the notes of the version's GitHub Release.
   account, or none for the public albums.
 - Texts and documentation in English, French, German and Spanish.
 
-[Unreleased]: https://github.com/guim31/gladys-piwigo/commits/main
+[Unreleased]: https://github.com/guim31/gladys-piwigo/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-piwigo/releases/tag/v1.0.0
